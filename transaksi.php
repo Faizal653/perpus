@@ -4,11 +4,22 @@ include 'koneksi.php';
 // Tambah transaksi jika form dikirim
 if (isset($_POST['simpan'])) {
     $id_buku = mysqli_real_escape_string($conn, $_POST['id_buku']);
+    $id_anggota = mysqli_real_escape_string($conn, $_POST['id_anggota']);
     $tanggal_pinjam = mysqli_real_escape_string($conn, $_POST['tanggal_pinjam']);
     $tanggal_kembali = mysqli_real_escape_string($conn, $_POST['tanggal_kembali']);
 
-    mysqli_query($conn, "INSERT INTO transaksi (id_buku, tanggal_pinjam, tanggal_kembali, status) 
-                         VALUES ('$id_buku', '$tanggal_pinjam', '$tanggal_kembali', 'menunggu')");
+    // ✅ ambil data anggota (SESUAIKAN NAMA KOLOM DI DB)
+    $getAnggota = mysqli_fetch_assoc(mysqli_query($conn, 
+        "SELECT * FROM anggota WHERE id_anggota='$id_anggota'"
+    ));
+
+    // ⚠️ ganti 'nama_anggota' jika nama kolom kamu berbeda
+    $nama_anggota = $getAnggota['nama_anggota'];
+
+    mysqli_query($conn, "INSERT INTO transaksi 
+    (id_anggota, anggota, id_buku, tanggal_pinjam, tanggal_kembali, status) 
+    VALUES 
+    ('$id_anggota', '$nama_anggota', '$id_buku', '$tanggal_pinjam', '$tanggal_kembali', 'dipinjam')");
 }
 ?>
 
@@ -44,6 +55,17 @@ if (isset($_POST['simpan'])) {
             ?>
         </select>
 
+        <label>Pilih Anggota</label>
+        <select name="id_anggota" required>
+            <option value="">-- Pilih Anggota --</option>
+            <?php
+            $anggota = mysqli_query($conn, "SELECT * FROM anggota");
+            while ($a = mysqli_fetch_assoc($anggota)) {
+                echo "<option value='{$a['id_anggota']}'>{$a['nama_anggota']}</option>";
+            }
+            ?>
+        </select>
+
         <label>Tanggal Pinjam</label>
         <input type="date" name="tanggal_pinjam" required>
 
@@ -58,6 +80,7 @@ if (isset($_POST['simpan'])) {
         <tr>
             <th>No</th>
             <th>Buku</th>
+            <th>Anggota</th>
             <th>Tanggal Pinjam</th>
             <th>Tanggal Kembali</th>
             <th>Status</th>
@@ -65,17 +88,29 @@ if (isset($_POST['simpan'])) {
 
         <?php
         $no = 1;
-        // Gunakan id_buku yang benar
-        $data = mysqli_query($conn, "SELECT t.*, b.judul 
-                                     FROM transaksi t
-                                     JOIN buku b ON t.id_buku = b.id_buku
-                                     ORDER BY t.tanggal_pinjam DESC");
+        $data = mysqli_query($conn, "SELECT 
+            id_transaksi,
+            id_buku,
+            anggota,
+            tanggal_pinjam,
+            tanggal_kembali,
+            status
+        FROM transaksi
+        ORDER BY id_transaksi DESC");
+
         while ($row = mysqli_fetch_assoc($data)) {
+
+            // ✅ ambil nama buku
+            $buku_nama = mysqli_fetch_assoc(mysqli_query($conn, 
+                "SELECT judul FROM buku WHERE id_buku = '{$row['id_buku']}'"
+            ));
+
             echo "<tr>
                     <td>$no</td>
-                    <td>".htmlspecialchars($row['judul'])."</td>
+                    <td>".htmlspecialchars($buku_nama['judul'] ?? '-')."</td>
+                    <td>".htmlspecialchars($row['anggota'] ?? '-')."</td>
                     <td>".htmlspecialchars($row['tanggal_pinjam'])."</td>
-                    <td>".htmlspecialchars($row['tanggal_kembali'])."</td>
+                    <td>".(!empty($row['tanggal_kembali']) ? htmlspecialchars($row['tanggal_kembali']) : '-')."</td>
                     <td>".htmlspecialchars($row['status'])."</td>
                   </tr>";
             $no++;

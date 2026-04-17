@@ -1,4 +1,5 @@
 <?php
+session_start();
 include 'koneksi.php';
 
 // ================= PROSES PINJAM =================
@@ -67,6 +68,17 @@ if (isset($_POST['pinjam'])) {
 <html>
 <head>
     <title>Daftar Buku - Anggota</title>
+    <a href="dashboarduser.php" style="
+    display:inline-block;
+    margin-bottom:15px;
+    padding:8px 12px;
+    background:#555;
+    color:white;
+    text-decoration:none;
+    border-radius:5px;
+">
+⬅ Kembali ke Dashboard
+</a>
 
     <!-- AUTO REFRESH + ANTI CACHE -->
     <?php if (!isset($_GET['id'])): ?>
@@ -108,7 +120,7 @@ if (isset($_GET['id'])) {
 ?>
 
     <div class="card" style="width:300px;">
-        <img src="gambar/<?php echo $buku['gambar']; ?>">
+        <img src="img/<?php echo !empty($buku['gambar']) ? $buku['gambar'] : 'mariposa.jpg'; ?>" width="100%">
         <h4><?php echo $buku['judul']; ?></h4>
         <p><strong>Penulis:</strong> <?php echo $buku['penulis']; ?></p>
         <p><strong>Penerbit:</strong> <?php echo $buku['penerbit']; ?></p>
@@ -138,11 +150,13 @@ while($buku = mysqli_fetch_assoc($result)){
 ?>
 
     <div class="card">
-        <h4><?php echo $buku['judul']; ?></h4>
-        <p><strong>Stok:</strong> <?php echo $stok; ?></p>
+    <img src="img/<?php echo !empty($buku['gambar']) ? $buku['gambar'] : 'mariposa.jpg'; ?>" width="100%">
+    <h4><?php echo $buku['judul']; ?></h4>
+    <p><strong>Stok:</strong> <?php echo $stok; ?></p>
 
         <?php if($stok > 0): ?>
             <a class="button-link" href="pinjam.php?id=<?php echo $id_buku; ?>">
+                
                 <button>Pinjam</button>
             </a>
         <?php else: ?>

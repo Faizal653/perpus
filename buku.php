@@ -1,7 +1,7 @@
 <?php
 include 'koneksi.php';
 
-// ================= PINJAM BUKU =================
+// ================= PINJAM =================
 if (isset($_GET['pinjam'])) {
     $id_buku = intval($_GET['pinjam']);
 
@@ -10,60 +10,37 @@ if (isset($_GET['pinjam'])) {
 
     if ($data && $data['stok'] > 0) {
 
-        // stok -1
         mysqli_query($conn, "UPDATE buku SET stok = stok - 1 WHERE id_buku='$id_buku'");
 
-        // insert transaksi
         mysqli_query($conn, "
             INSERT INTO transaksi (id_buku, status)
             VALUES ('$id_buku', 'dipinjam')
         ");
 
-        echo "<script>
-                alert('Buku berhasil dipinjam!');
-                window.location='pinjam.php';
-              </script>";
+        echo "<script>alert('Buku dipinjam!'); window.location='kelola.php';</script>";
         exit;
 
     } else {
-        echo "<script>
-                alert('Stok habis!');
-                window.location='pinjam.php';
-              </script>";
+        echo "<script>alert('Stok habis!'); window.location='kelola.php';</script>";
         exit;
     }
 }
 
-
-// ================= KEMBALIKAN BUKU =================
+// ================= KEMBALIKAN =================
 if (isset($_GET['kembali'])) {
     $id = intval($_GET['kembali']);
 
     $cek = mysqli_query($conn, "SELECT * FROM transaksi WHERE id_transaksi='$id'");
-    $data = mysqli_fetch_assoc($cek);
+    $trx = mysqli_fetch_assoc($cek);
 
-    if ($data) {
+    if ($trx && $trx['status'] != 'dikembalikan') {
 
-        if ($data['status'] == 'dikembalikan') {
-            echo "<script>
-                    alert('Buku sudah dikembalikan!');
-                    window.location='pinjam.php';
-                  </script>";
-            exit;
-        }
+        $id_buku = $trx['id_buku'];
 
-        $id_buku = $data['id_buku'];
-
-        // stok +1
         mysqli_query($conn, "UPDATE buku SET stok = stok + 1 WHERE id_buku='$id_buku'");
+        mysqli_query($conn, "UPDATE transaksi SET status='dikembalikan' WHERE id_transaksi='$id'");
 
-        // update status
-        mysqli_query($conn, "UPDATE transaksi SET status='dikembalikan' WHERE id='$id'");
-
-        echo "<script>
-                alert('Buku berhasil dikembalikan!');
-                window.location='pinjam.php';
-              </script>";
+        echo "<script>alert('Buku dikembalikan!'); window.location='kelola.php';</script>";
         exit;
     }
 }
@@ -72,92 +49,80 @@ if (isset($_GET['kembali'])) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Daftar Buku</title>
-
-    <!-- AUTO REFRESH -->
-    <meta http-equiv="refresh" content="5">
+    <title>Kelola Buku</title>
 
     <style>
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f0f2f5;
-        margin: 0;
+        font-family: Arial;
+        background: #f4f6f9;
         padding: 20px;
-        color: #333;
     }
 
-    .container { width: 90%; margin: auto; }
+    table {
+        width: 80%;
+        margin: auto;
+        border-collapse: collapse;
+        background: white;
+    }
 
-    .card {
-        width: 220px;
-        background: #fff;
-        padding: 15px;
-        margin: 15px;
-        float: left;
-        border-radius: 12px;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
         text-align: center;
     }
 
-    button {
-        margin-top: 8px;
-        padding: 6px 0;
-        width: 100px;
-        border: none;
-        border-radius: 6px;
+    th {
+        background: #00ccff;
         color: white;
+    }
+
+    button {
+        padding: 5px 10px;
+        border: none;
+        color: white;
+        border-radius: 5px;
         cursor: pointer;
     }
 
-    .pinjam { background: #00ccff; }
+    .pinjam { background: #007bff; }
     .kembali { background: #28a745; }
-    .stok-habis { background: gray; }
-
-    .clear { clear: both; }
+    .disabled { background: gray; cursor: not-allowed; }
     </style>
 </head>
 
 <body>
 
-<div class="container">
-    <h2>📚 Daftar Buku</h2>
-    <hr>
+<h2 align="center">📚 Kelola Buku</h2>
+
+<table border="1" cellpadding="10" cellspacing="0" align="center">
+    <tr>
+        <th>No</th>
+        <th>Judul</th>
+        <th>Stok</th>
+        <th>Aksi</th>
+    </tr>
 
 <?php
 $query = mysqli_query($conn, "SELECT * FROM buku");
+$no = 1;
 
 while ($data = mysqli_fetch_assoc($query)) {
-
-    $id_buku = $data['id_buku'];
-    $judul = $data['judul'];
-    $stok = $data['stok'];
 ?>
 
-    <div class="card">
-        <h4><?php echo $judul; ?></h4>
-        <p>Stok: <?php echo $stok; ?></p>
-
-        <!-- PINJAM -->
-        <?php if ($stok > 0): ?>
-            <a href="?pinjam=<?php echo $id_buku; ?>">
-                <button class="pinjam">Pinjam</button>
-            </a>
-        <?php else: ?>
-            <button class="stok-habis" disabled>Stok Habis</button>
-        <?php endif; ?>
-
-        <!-- KEMBALIKAN -->
-        <a href="?kembali=<?php echo $id_buku; ?>"
-           onclick="return confirm('Yakin ingin mengembalikan buku ini?')">
-            <button class="kembali">Kembalikan</button>
+<tr>
+    <td><?php echo $no++; ?></td>
+    <td><?php echo $data['judul']; ?></td>
+    <td><?php echo $data['stok']; ?></td>
+    <td>
+        <a href="?hapus=<?php echo $data['id_buku']; ?>"
+           onclick="return confirm('Yakin ingin menghapus buku ini?')">
+            <button style="background:red; color:white;">Hapus</button>
         </a>
-
-    </div>
+    </td>
+</tr>
 
 <?php } ?>
-
-<div class="clear"></div>
-</div>
+</table>
 
 </body>
 </html>
