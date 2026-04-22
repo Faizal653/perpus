@@ -5,19 +5,19 @@ include 'koneksi.php';
 if (isset($_POST['simpan'])) {
     $id_buku = mysqli_real_escape_string($conn, $_POST['id_buku']);
     $id_anggota = mysqli_real_escape_string($conn, $_POST['id_anggota']);
+    $nama_anggota = mysqli_real_escape_string($conn, $_POST['nama_anggota']);
     $tanggal_pinjam = mysqli_real_escape_string($conn, $_POST['tanggal_pinjam']);
     $tanggal_kembali = mysqli_real_escape_string($conn, $_POST['tanggal_kembali']);
 
-    // ✅ ambil data anggota (SESUAIKAN NAMA KOLOM DI DB)
     $getAnggota = mysqli_fetch_assoc(mysqli_query($conn, 
-        "SELECT * FROM anggota WHERE id_anggota='$id_anggota'"
-    ));
+    "SELECT nama_anggota FROM anggota WHERE id_anggota='$id_anggota'"
+));
 
-    // ⚠️ ganti 'nama_anggota' jika nama kolom kamu berbeda
-    $nama_anggota = $getAnggota['nama_anggota'];
+$nama_anggota = $getAnggota['nama_anggota'] ?? 'Tidak ditemukan';
 
+    // ✅ SATU-SATUNYA INSERT DI SINI
     mysqli_query($conn, "INSERT INTO transaksi 
-    (id_anggota, anggota, id_buku, tanggal_pinjam, tanggal_kembali, status) 
+    (id_anggota, nama_anggota, id_buku, tanggal_pinjam, tanggal_kembali, status) 
     VALUES 
     ('$id_anggota', '$nama_anggota', '$id_buku', '$tanggal_pinjam', '$tanggal_kembali', 'dipinjam')");
 }
@@ -80,7 +80,7 @@ if (isset($_POST['simpan'])) {
         <tr>
             <th>No</th>
             <th>Buku</th>
-            <th>Anggota</th>
+            <th>Nama Anggota</th>
             <th>Tanggal Pinjam</th>
             <th>Tanggal Kembali</th>
             <th>Status</th>
@@ -89,14 +89,14 @@ if (isset($_POST['simpan'])) {
         <?php
         $no = 1;
         $data = mysqli_query($conn, "SELECT 
-            id_transaksi,
-            id_buku,
-            anggota,
-            tanggal_pinjam,
-            tanggal_kembali,
-            status
-        FROM transaksi
-        ORDER BY id_transaksi DESC");
+    id_transaksi,
+    id_buku,
+    nama_anggota,
+    tanggal_pinjam,
+    tanggal_kembali,
+    status
+FROM transaksi
+ORDER BY id_transaksi DESC");
 
         while ($row = mysqli_fetch_assoc($data)) {
 
@@ -108,7 +108,7 @@ if (isset($_POST['simpan'])) {
             echo "<tr>
                     <td>$no</td>
                     <td>".htmlspecialchars($buku_nama['judul'] ?? '-')."</td>
-                    <td>".htmlspecialchars($row['anggota'] ?? '-')."</td>
+                    <td>".htmlspecialchars($row['nama_anggota'] ?? '-')."</td>
                     <td>".htmlspecialchars($row['tanggal_pinjam'])."</td>
                     <td>".(!empty($row['tanggal_kembali']) ? htmlspecialchars($row['tanggal_kembali']) : '-')."</td>
                     <td>".htmlspecialchars($row['status'])."</td>

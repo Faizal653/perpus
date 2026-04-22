@@ -97,7 +97,7 @@ $nama_admin = $_SESSION['admin'];
         <a href="logout.php" class="logout">Logout</a>
     </div>
 
-    <h2>📊 Dashboard Perpustakaan</h2>
+    <h2>📊 Dashboard Admin</h2>
 
     <div class="btn-container">
 

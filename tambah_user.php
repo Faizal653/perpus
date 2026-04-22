@@ -17,7 +17,7 @@ if (isset($_POST['tambah'])) {
     if (mysqli_num_rows($cek) > 0) {
         $message = "❌ Username '$username' sudah terdaftar!";
     } else {
-        $query = "INSERT INTO anggota (username, password, nama_lengkap, alamat, nomor_telepon) 
+        $query = "INSERT INTO anggota (username, password, nama_anggota, alamat, nomor_telepon) 
                   VALUES ('$username','$password','$nama','$alamat','$telepon')";
         if (mysqli_query($conn, $query)) {
             $message = "✅ Anggota '$nama' berhasil ditambahkan!";
@@ -66,7 +66,7 @@ $anggota_list = mysqli_query($conn, "SELECT * FROM anggota ORDER BY id_anggota A
     <form method="POST">
         <input type="text" name="username" placeholder="Username" required>
         <input type="password" name="password" placeholder="Password" required>
-        <input type="text" name="nama" placeholder="Nama Lengkap" required>
+        <input type="text" name="nama" placeholder="Nama Anggota" required>
         <input type="text" name="alamat" placeholder="Alamat" required>
         <input type="text" name="telepon" placeholder="Nomor Telepon" required>
         <button name="tambah">Tambah Anggota</button>
@@ -77,7 +77,7 @@ $anggota_list = mysqli_query($conn, "SELECT * FROM anggota ORDER BY id_anggota A
         <tr>
             <th>No</th>
             <th>Username</th>
-            <th>Nama Lengkap</th>
+            <th>Nama Anggota</th>
             <th>Alamat</th>
             <th>Telepon</th>
         </tr>
@@ -87,7 +87,7 @@ $anggota_list = mysqli_query($conn, "SELECT * FROM anggota ORDER BY id_anggota A
             <tr>
                 <td><?php echo $no++; ?></td>
                 <td><?php echo $row['username']; ?></td>
-                <td><?php echo $row['nama_lengkap']; ?></td>
+                <td><?php echo $row['nama_anggota']; ?></td>
                 <td><?php echo $row['alamat']; ?></td>
                 <td><?php echo $row['nomor_telepon']; ?></td>
             </tr>

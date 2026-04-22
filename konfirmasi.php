@@ -111,7 +111,7 @@ ORDER BY p.id DESC");
         while($row = mysqli_fetch_assoc($q)){
 
     // ✅ FIX ERROR DI SINI
-    $status_db = strtolower($row['status'] ?? '');
+    $status_db = strtolower(trim($row['status'] ?? ''));
 
     $badge_class = "pending";
     if ($status_db == "dipinjam") $badge_class = "disetujui";
@@ -138,27 +138,23 @@ if ($status_db == "pending" || $status_db == "menunggu") {
     onclick=\"return confirm('Tolak peminjaman ini?')\">❌ Tolak</a>
     ";
 
-} elseif ($status_db == "menunggu konfirmasi kembali") {
+} elseif ($status_db == "dipinjam" || $status_db == "menunggu konfirmasi") {
 
     echo "
     <a class='btn setuju' href='?aksi=kembalikan&id={$row['id']}' 
     onclick=\"return confirm('Konfirmasi pengembalian buku ini?')\">
-    ✔ Konfirmasi Kembali</a>
+    🔄 Kembalikan</a>
     ";
-
 
 } else {
 
     echo "<span class='btn disabled'>✔ Selesai</span>";
 
+
+
 }
 
-            echo "
-                <a class='btn hapus' href='?aksi=hapus&id={$row['id']}' onclick=\"return confirm('Hapus data peminjaman ini?')\">🗑 Hapus</a>
-                </td>
-            </tr>";
-
-            $no++;
+            
         }
         ?>
     </table>

@@ -7,10 +7,11 @@ if (isset($_GET['kembalikan'])) {
 
     $data = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM peminjaman WHERE id='$id'"));
     $id_buku = $data['id_buku'];
+    
 
     mysqli_query($conn, "
         UPDATE peminjaman 
-SET status='Menunggu Konfirmasi' 
+SET status='Menunggu Konfirmasi Kembali' 
 WHERE id='$id'
     ");
 

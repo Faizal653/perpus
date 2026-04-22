@@ -5,11 +5,15 @@ include 'koneksi.php';
 // ================= PROSES PINJAM =================
 if (isset($_POST['pinjam'])) {
     $id_buku = intval($_POST['id_buku']);
-    $tgl_pinjam = $_POST['tanggal_pinjam'];
-    $tgl_kembali = $_POST['tanggal_kembali'];
+    $id_anggota = $_POST['id_anggota'];
+    $nama_anggota = $_POST['nama_anggota'];
+    $tanggal_pinjam = $_POST['tanggal_pinjam'];
+    $tanggal_kembali = $_POST['tanggal_kembali'];
+
+    
 
     // validasi tanggal
-    if ($tgl_kembali < $tgl_pinjam) {
+    if ($tanggal_kembali < $tgl_pinjam) {
         echo "<script>alert('Tanggal kembali harus setelah tanggal pinjam!');</script>";
     } else {
 
@@ -43,7 +47,7 @@ if (isset($_POST['pinjam'])) {
             $insert = mysqli_query($conn, "
                 INSERT INTO peminjaman 
                 (id_buku, tanggal_pinjam, tanggal_kembali, status)
-                VALUES ('$id_buku', '$tgl_pinjam', '$tgl_kembali', 'pending')
+                VALUES ('$id_buku', '$tanggal_pinjam', '$tanggal_kembali', 'pending')
             ");
 
             if (!$insert) {
